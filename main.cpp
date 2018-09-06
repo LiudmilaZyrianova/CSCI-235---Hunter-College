@@ -1,0 +1,68 @@
+//Liudmila Zyrianova
+//CSCI 235
+//05/17/2018
+//Programming Assignment 2
+//Problem 1
+
+#include <iostream>
+#include <stack>
+#include <math.h>
+
+using namespace std;
+
+int main() {
+    int n;          //Number of elements
+    cin >> n;
+    stack <int> s1;     //Stores elements
+    stack <int> s2;     //Temporary stack
+
+    //Read the input elements to s1.
+    int x;
+    for (int i = 0; i<n; i++) {
+        cin>> x;
+        s1.push(x);
+    }
+
+
+    int minV;   //Represent the minimum element in stack
+    for (int i=0; i<n; i++ ){       //Repeat the following steps n times, which will eventually sort elements in s2 with the biggest on the top.
+        minV = s1.top();            //Make minV equal to the peek element of s1.
+        //Find minimum element in s1 and remove all elements from s1 to s2. Do this by:
+        while (!s1.empty()){        //Until s1 is empty,
+            int next = s1.top();    //making variable next equal to the peek of s1,
+            s1.pop();               //popping this element from s1,
+            s2.push(next);          //pushing it to the s2, and
+            minV= min(minV, next);  //make minV equal to the minimum of the current minV and next.
+        }
+
+        //Push all elements back from s2 to s1, except minimal one. Do this by:
+        int marker = 1;             //Shows, whether we already found minimum element in s2.
+        while (s2.size()>i){        //Go through n - i upper elements of s2
+            if (( marker ==1 ) && (s2.top() == minV)){      //If we catch element equal to minV, while marker is 1, then
+                s2.pop();       //just pop it from s2, and
+                marker = 0;     //make marker equal to 0.
+            } else {            //In other cases
+                s1.push(s2.top());      //pop this element from s2, and push it to the s1.
+                s2.pop();
+            }
+        }
+        //Finally, we push minimal element to s2.
+        s2.push(minV);
+        //Thus, in the end of the i-th step we’ve got i+1 smallest elements from initial set of n elements in s2s in the increasing order with the biggest element on the top. The rest n-i-1 elements are in s1.
+    }
+
+    //After we’ve sorted elements in s2 with the biggest on the top,
+    while (!s2.empty()){        //we remove them to s1 by
+        s1.push(s2.top());      //popping each element from s2, and pushing in to s1.
+        s2.pop();
+    }
+    //Thus, we’ve got sorted elements in s1 with the smallest on the top.
+
+    //Finally, print elements from s1. The elements will be printed in the increasing order.
+    for (int i=0; i<n; i++ ){
+        cout << s1.top()<< endl;
+        s1.pop();
+    }
+
+    return 0;
+}
