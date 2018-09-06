@@ -1,4 +1,10 @@
 // Liudmila Zyrianova,CSCI 235, 02/27/2018, Programming Assignment 1, Problem 2 a):
+/* Write a program to print \10" dierent ways of arranging eight queens on an 8  8 chess board so that
+none of them share the same row, column, or diagonal. In this case, \diagonal" means all diagonals, not
+just the two that bisect the board.
+• The output must be a matrix (8  8). Each cell of the matrix must be 1 if there is a queen there,
+and 0 otherwise.
+*/
 
 #include <iostream>
 #include <vector>
