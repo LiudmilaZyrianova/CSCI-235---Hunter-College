@@ -1,0 +1,169 @@
+//Liudmila Zyrianova
+//CSCI 235
+//05/17/2018
+//Programming Assignment 3
+//Problem 3
+
+#include <iostream>
+#include <vector>
+#include <stack>
+
+using namespace std;
+
+const int infin = 1000000;       //Global constant variable, which represent big number - substitution for infinity
+
+int ExtractMin(int start , vector<int>& d, vector<int>& markers ){      //Returns unvisited vertex with the smallest weighted distances
+    int minim = infin;      //Smallest weighted distance in d
+    int minimV = start;     //Vertex, which has the smallest weighted distance in d.
+
+    for (int i = 0; i< d.size(); i++){      //Go through each vertex in order to find the one with the smallest weighted distance.
+        if ((d[i] < minim )&& (markers[i]==0)){     //If this vertex has distance d smaller than current minim, and it hasn’t been visited in Dijkstra,
+            minim = d[i];           //make minim equal to this distance,
+            minimV = i;             //minimV equal to this vertex.
+        }
+    }
+    return minimV;                  //Return the unvisited vertex with the smallest weighted distance.
+}
+
+int  Dijkstra (int start, int finish, int n, vector<vector<int>>& v){   // Find minimal weighted distance from vertex start to vertex finish, which doesn’t contain the edge between start and finish.
+    vector<int> markers (n, 0);     //Shows, whether the certain vertex has been visited ( marker [i] = 1 if i has been visited. Otherwise, 0)
+    vector<int> d (n, 0);       //Stores the minimal weighted distance from vertex start to all other vertices.
+    int restV = n;
+
+    //Make all distances d[i] equal to infinity (infin), besides distance to start, which is 0 (d[start] = 0).
+    for (int i = 0; i< n; i++) {
+        if (i != start) {
+            d[i] = infin;
+        }
+    }
+
+    //Find all minimal weighted distances from start to all other vertices.
+    while (restV > 1){
+        int minimV = ExtractMin(start, d, markers);     //Unvisited vertex with the smallest weighted distances
+        markers [minimV] = 1;       //Mark minimV as visited
+        restV = restV-1;            //Decrease the number of vertices left to examine by one
+        for (int i = 0; i < n; i++) {       //Go through each vertex
+            if ( (markers[i]==0)&& (v[minimV][i] != -1) && ( d[i] > ( d[minimV] + v[minimV][i] )) ){  //Found the unvisited neighbor of minimV, which currently has the distance d more than sum of distances to minimV and the weight of the edge between minimV and itself.
+                d[i] = d[minimV] + v[minimV][i];        //Make its distance d equal to the sum of distances to minimV and the weight of the edge between minimV and itself.
+            }
+        }
+    }
+
+    return d[finish];
+}
+
+int main() {
+    int n;      //Number of vertices in graph
+    cin >> n;
+
+    vector<vector<int>> v;      //Stores the input Adjacency Matrix
+    vector<vector <int>> cyc ;  //Shows the minimal weight of the cycle from i to i, which goes through edge (i ,j)
+    vector<int> tr;             //Empty vector
+
+    //Fill out v and cyc by empty vectors
+    for (int i = 0; i < n; i++) {
+        v.push_back(tr);
+        cyc.push_back(tr);
+    }
+
+    //Read the input adjacency matrix to v and fill cyc with zeros
+    int x;
+    for (int i = 0; i < n; i++){
+        for (int j = 0; j < n; j++){
+            cin >> x;
+            v[i].push_back(x);          //Read the input adjacency matrix to v
+            cyc[i].push_back(0);        //Fill cyc with zeros
+        }
+    }
+
+
+
+
+    for (int i = 0; i < n; i++){        //Go through each edge (we can do this by going only through the upper triangle of matrix, because the graph is undirected and the adjacency matrix is diagonal-symmetrical)
+        for (int j = i; j < n; j++){
+            int deletedWeight;
+            deletedWeight = v[i][j];    //Weight of edge between vertices i and j
+            if (deletedWeight != -1){   //If there is an edge between i and j, then
+                v[i][j] = -1;           //delete this edge,
+                v[j][i] = -1;           //delete this edge.
+                int dist;               //Minimal weighted distance between vertices i and j, which doesn’t contain the edge between i and j.
+                dist = Dijkstra(i, j, n,v);     // Find minimal weighted distance between vertices i and j, which doesn’t contain the edge between i and j.
+                cyc[i][j] = dist + deletedWeight;  //Minimal weight of the cycle from i to i, which goes through the edge between i and j (equal to the sum of minimal distance to j and the weight of the edge between i and j). If there is no way to j other than the edge between i and j, then Dijkstra returns infinity, and c[i][j] will be at least infinity.
+                v[i][j] = deletedWeight;        //Return deleted edge back to the v.
+                v[j][i] = deletedWeight;        //Return deleted edge back to the v.
+            } else{         //If there is no edge between i and j,
+                cyc[i][j] = infin;      //make c[i][j] equal to infinity.
+            }
+        }
+    }
+
+    //Find weight of min cycle
+    int minim = infin;      //The smallest weighted cycle.
+    int minimVFrom = 0 ;    //Coordinates of cyc[minimVFrom][minimVTo] , which is equal to the minim.
+    int minimVTo = 0;       //Coordinates of cyc[minimVFrom][minimVTo] , which is equal to the minim.
+    for (int i = 0; i < n; i++){    //Go through each edge (we can do this by going only through the upper triangle of matrix, because the graph is undirected and the adjacency matrix is diagonal-symmetrical)
+        for (int j = i; j < n; j++){
+            //After all iterations this comparison will give the smallest minimVFrom, which will be in the minimal weighted cycle, because we won’t update anything after minimVFrom:
+            if (cyc[i][j] < minim){     //If found cyc[i][j], smaller than minim,
+                minim = cyc[i][j];      //then we update minim, minimVFrom, and minimVTo.
+                minimVFrom = i;
+                minimVTo = j;
+            }
+        }
+    }
+
+    //If there is no cycles at all, each cell of cyc[i][j] will be at least infin. Thus, in this case print that there is no cycles and stop the program.
+    if (minim == infin){
+        std::cout << "No cycles!" << std::endl;
+        return 0;
+    }
+
+    v[minimVFrom][minimVTo] = -1;       //Delete the edge between minimVFrom and minimVTo.
+    v[minimVTo][minimVFrom] = -1;       //Delete the edge between minimVFrom and minimVTo.
+
+    //Do Dijkstra once again for minimVFrom as start. But at this time keep track of the parents of vertices
+    //BEGIN OF DIJKSTRA
+    int start = minimVFrom;
+    vector<int> parent (n, 0);      //Keeps track of the parents of vertices in the parent[ ].
+    parent[start]= -1;              //Initially make all parens [i] = 0, but parens [start] = -1.
+    vector<int> markers (n, 0);
+    vector<int> d (n, 0);
+
+    for (int i = 0; i< n; i++) {
+        if (i != start) {
+            d[i] = infin; //  instead infinity
+        }
+    }
+
+    int restV = n;
+    while (restV > 1){
+        int minimV = ExtractMin(start, d, markers);
+        markers [minimV] = 1;
+        restV = restV-1;
+        for (int i = 0; i < n; i++) {
+            if ( (markers[i]==0)&& (v[minimV][i] != -1) && ( d[i] > ( d[minimV] + v[minimV][i] )) ){
+                d[i] = d[minimV] + v[minimV][i];
+                parent[i] = minimV;     //When change the distance d of vertex i, we also change parent [i] to the minimV (vertex, which leads to i)
+            }
+        }
+    }
+    //END OF DIJKSTRA
+
+    stack<int> final;       //Stores the vertices of the cycle in the correct order.
+    int p = parent[minimVTo];  //Vertex, which will be pushed to final
+    final.push(minimVTo);   //At the beginning, push to final the last vertex of the cycle, which is minimVTo
+    while (p!=-1){          //Until get to the first vertex of the cycle ( which parent is -1)
+        final.push(p);      //Push p to the final
+        p = parent[p];      //Make p to be parent of p.
+    }
+
+    //Print out final
+    while(!final.empty()){
+        cout<< final.top()<< " ";
+        final.pop();
+    }
+    cout<< endl<< "Total weight: "<< minim << endl;
+
+
+    return 0;
+}
