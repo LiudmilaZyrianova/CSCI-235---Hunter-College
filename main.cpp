@@ -1,0 +1,100 @@
+//Liudmila Zyrianova
+//CSCI 235
+//05/17/2018
+//Programming Assignment 3
+//Problem 2
+
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <string>
+#include <math.h>
+
+using namespace std;
+
+void BFS (int start, int n, vector<vector<int>>& v, vector<vector<int>>& markers){  //Finds all vertices, to which we can get from vertex start
+    queue <int> q;          //Create the queue q, which temporary stores vertices.
+    q.push(start);          //Push initial vertex start into q.
+    markers[start][start] = 1;      //Obviously, we can get from vertex start to vertex start. Thus, markers[start][start] = 1.
+
+    //Try to get to all other vertices:
+    while (!q.empty()){     //While q is not empty,
+        int t = q.front();      //enqueue vertex t,
+        q.pop();
+        for (int i = 0; i<n; i++) { //For each unvisited neighbor of t
+            if ( ( v[t][i]==1 ) &&(markers[start][i]==0)){      //(vertex, reachable from t by one edge, and which is still not marked)
+                markers[start][i]=1;        //mark it as reachable from start (because t is reachable from start, thus, neighbor of t is reachable from start), and
+                q.push(i);          //push it to the end of q.
+            }
+        }
+    }
+}
+
+int main() {
+    //We can assume that there is no -1 in the adjacency matrix, because we consider only existing edges with 1 in the adjacency matrix.
+    int n;
+    cin >> n;           //Number of vertices in graph
+    vector<vector<int>> v;     //Stores the input Adjacency Matrix
+    vector<vector <int>> markers ;  //Shows if it is possible to get from vertex i to vertex j (markers[i][j] = 1 if it is possible to get from vertex i to vertex j; markers[i][j] = 0 otherwise)
+    vector<int> markers2;   //Stores the color of each vertex (all vertices in one strongly connected component have the same color, different for each component)
+    vector<int> tr;     //Empty vector
+
+    //Fill out v and markers by empty vectors.
+    for (int i = 0; i < n; i++) {
+        v.push_back(tr);
+        markers.push_back(tr);
+        markers2.push_back(i);  // color each vertex in different colors from color 0 to color n-1, equal to the number of vertex.
+    }
+
+    //Read the input adjacency matrix to v and fill markers with zeros
+    int x;
+    for (int i = 0; i < n; i++){
+        for (int j = 0; j < n; j++){
+            cin >> x;
+            v[i].push_back(x);          //Read the input adjacency matrix to v
+            markers[i].push_back(0);    //Fill markers with zeros
+        }
+    }
+
+    //For each vertex i do BFS. It finds all vertices, to which we can get from vertex i. After the cycle we will get markers, where for each vertex i markers[i][j] will be 1, if we can get from i to j (0 otherwise).
+    for (int i = 0; i < n; i++) {
+        BFS( i, n, v, markers);
+    }
+
+    //Color all strongly connected vertices in the same specific color.
+    for (int i = 0; i < n; i++){
+        for (int j = i; j < n; j++){
+            if ((markers[i][j] == markers[j][i]) && (markers[i][j]==1)){    //We can get from vertex i to vertex j, and from vertex j to vertex i. Thus, i and j are strongly connected and belong to the same component.
+                //We color both of them in the common color (minimal color of i and j)
+                //This coloring works, because as we go through cycle, we mark all vertices, strongly connected to 0 vertex by 0.
+                //Then we mark all vertices, strongly connected to 1 by 0, if 1 is strongly connected to 0 (thus, color of 1 has been changed from 1 to 0 in the previous step ),
+                //  or by 1, if 1 is not strongly connected to 0 (thus, color of 1 has not been changed in the previous step).
+                //Etc.
+                int comCol = min (markers2[i], markers2[j]);
+                markers2[i] = comCol;
+                markers2[j] = comCol;
+            }
+        }
+    }
+
+    //Print in the output strongly connected components.
+    int c = 0;
+    while ( c < n ){    //Do this by going through each possible color from 0 to n-1
+        int mark = 0;   //Special marker which is 0 if there is no vertices of color c, and 1 if there is at least one vertex of color c.
+
+        for (int i=0; i < n; i++){  //For each color check all vertices.
+            if (markers2[i] == c){  //If we found vertex of the color c,
+                cout << i<< " ";    //print it out,
+                mark = 1;           //and change marker to 1.
+            }
+        }
+
+        if (mark == 1){     //If mark is 1, it means that there is at least one vertex of color c, and we have printed it out.
+            cout << endl;   //Thus, we should move to the next string in the output.
+        }
+        c = c+1;        //Change color
+
+    }
+
+    return 0;
+}
