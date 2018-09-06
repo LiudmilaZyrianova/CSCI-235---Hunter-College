@@ -1,0 +1,110 @@
+//Liudmila Zyrianova
+//CSCI 235
+//05/17/2018
+//Programming Assignment 2
+//Problem 3
+
+#include <iostream>
+
+using namespace std;
+
+class ListNode {    //Class ListNode
+public:
+    int val;        //Stores the value of the node
+    ListNode* next; //Points to the next node
+};
+
+ListNode* getLoop(ListNode* first){     //Returns the pointer to the first node in the loop (or NULL, is there is no loop in the linked list)
+    //Detects the loop in the linked list, using Floyd’s Cycle detection algorithm.
+    ListNode* slowP = first;        //Moves along the linked list from one node to its next node.
+    ListNode* fastP = first;        //Moves along the linked list from one node to the next of its next node (in other words, over the node)
+    slowP = slowP->next;            //Points to the next of first
+    fastP = fastP->next->next;      //Points to the next of the first’s next
+
+    while ( (slowP!=NULL) && (fastP!=NULL) ){       //Goes through the cycle unlit one of the pointers will become NULL or the node in the list’s loop will be found
+        if (slowP == fastP){        //If the pointers are the same,
+            break;                  //breaks the cycle.
+        } else {                    //Otherwise, it moves pointers:
+            slowP = slowP->next;    //slowP to its next node, and
+            fastP = fastP->next->next;  //fastP to the next of its next node.
+        };
+    }
+
+    //Finds the pointer to the first node in the loop
+    if ( (slowP==NULL) || (fastP==NULL) ){      //If one of the pointers (slowP or fastP) has become NULL,
+        return NULL;        //it means that there is no loop in the list. Thus, the function returns NULL.
+    } else {                //Otherwise:
+        slowP = first;      //Makes slowP equal to first.
+        if (slowP == fastP){        //If slowP is equal to fastP, then the loop starts from the first node.
+            return slowP;           //Thus, the function returns slowP.
+        }
+        ListNode* fastP1 = fastP->next;     //Moves along the loop, starting from the fastP->next, which is certainly in the loop, because we have found that fastP is in the loop.
+        while (true){           //Moves slowP along the linked list.
+            if  ( (slowP==fastP1) || (slowP==fastP) ) {       // If slowP is equal to fastP of fastP1, then the loop starts from slowP.
+                return slowP;                                 //Thus, the function returns slowP
+            }
+            while (fastP1!=fastP){      //Moves fastP1 along the loop until one of two cases happens: it becomes fastP or it becomes slowP.
+                if  (slowP == fastP1) {       //If it becomes slowP,
+                    return slowP;           //it has found the first node in the loop, which is slowP. Thus, it returns this pointer.
+                } else {                    //Otherwise,
+                    fastP1 = fastP1->next;      //moves slowP to its next node
+                }
+            }
+            //If slowP is not the part of the loop, move it to the next node.
+            slowP = slowP->next;
+            fastP1 = fastP->next;       //Again start from fastP->next
+        }
+    }
+
+
+}
+
+void deleteListWithLoop(ListNode* first, ListNode* start){       //Deletes all the nodes in the linked list, even if it has a loop, which starts from node, which is pointed by start (if the list hasn’t the loop, start is NULL).
+    ListNode* currentP  = first;        //Points to the current node
+    ListNode* nextP = first->next;      //Points to the next node
+    //Deletes nodes before the loop
+    if (first!=start){
+        while (nextP!=start){                //Goes through each node of the list until start:
+            currentP->next = nextP->next;   //Makes the next field of currentP equal to the next field of nextP
+            delete (nextP);                 //Deletes nextP
+            nextP = currentP->next;         //Makes nextP points to the currentP->next
+        }
+        //Deletes node, which wasn’t deleted during the cycle:
+        currentP  = start;
+        delete (first);     //first
+    }
+
+
+    //Delete the loop
+    currentP  = start;          //Points to the start
+    nextP = start->next;      //Points to the start's next
+    while (nextP!=start){                //Goes through each node of the loop until start:
+        currentP->next = nextP->next;   //Makes the next field of currentP equal to the next field of nextP
+        delete (nextP);                 //Deletes nextP
+        nextP = currentP->next;         //Makes nextP points to the currentP->next
+    }
+    //Deletes node, which wasn’t deleted during the cycle:
+    delete (start);     //start
+}
+
+int main() {
+    ListNode* first = new ListNode;
+    first->val = 5;
+    first->next = new ListNode;
+    first->next->val = 3;
+    first->next->next = new ListNode;
+    first->next->next->val = 1;
+    first->next->next->next = new ListNode;
+    first->next->next->next->val= 0;
+    first->next->next->next->next = first->next->next;
+
+
+    ListNode* p = getLoop(first);
+    if (p==NULL){
+        cout << "No cycle"<< endl;
+    } else {
+        cout << "Cycle starts from " << p->val;
+    }
+    deleteListWithLoop (first, p);
+    return 0;
+}
