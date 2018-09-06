@@ -1,4 +1,11 @@
 // Liudmila Zyrianova,CSCI 235, 02/27/2018, Programming Assignment 1, Problem 2 b):
+/* Input: the program will read an integer n, 8 < n  20.
+Your program should print \one" way of arranging n queens on an nn chess board, and it must follow
+the above rules: none of them share the same row, column, or diagonal (all diagonal not just the main
+two ones).
+• Again, the output must be a matrix (n  n). Each cell of the matrix must be 1 if there is a queen
+there, and 0 otherwise.
+*/
 
 #include <iostream>
 #include <vector>
