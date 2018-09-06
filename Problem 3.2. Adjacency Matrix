@@ -4,6 +4,11 @@
 //Programming Assignment 3
 //Problem 2
 
+/* Write a program to and all Strongly Connected Components of a directed graph.
+The input is the Adjacency Matrix A of the graph. If there is an edge from vertex i to vertex j, A[i; j] = 1
+and A[j; i] = -1. If there is no edge between i and j, A[i; j] = A[j; i] = 0.
+*/
+
 #include <iostream>
 #include <vector>
 #include <queue>
