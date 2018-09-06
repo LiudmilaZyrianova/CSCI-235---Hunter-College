@@ -4,6 +4,13 @@
 //Programming Assignment 3
 //Problem 4
 
+/* Given is a weighted connected undirected graph. Write a program to and the spanning tree of this graph
+with minimum total weight.
+Spanning tree: a spanning tree T of an undirected graph G is a subgraph that is a tree which includes
+all of the vertices of G.
+Tree: is a connected graph which has no cycle.
+*/
+
 #include <iostream>
 #include <vector>
 
