@@ -1,0 +1,140 @@
+//Liudmila Zyrianova
+//CSCI 235
+//05/17/2018
+//Programming Assignment 2
+//Problem 4
+
+#include <iostream>
+
+using namespace std;
+
+class ListNode {    //Class ListNode
+public:
+    int val;        //Stores the value of the node
+    ListNode* next; //Points to the next node
+
+    ListNode() {        //Constructor, which initialize:
+        val = 0;
+        next = NULL;
+    }
+    ListNode(int x){        //Constructor, which initialize:
+        val = x;
+        next = NULL;
+    }
+    void pushBackNode(int x){       //Makes the next of the current node point to the new node with val = x and next = NULL.
+        this->next = new ListNode(x);
+    }
+};
+
+ListNode* getList(ListNode* first1, ListNode* first2){      //Creates the linked list of digits, where
+                                                            //val of the first node is the sum of two numbers, obtained from two initial linked lists by summarizing first nodes of linked lists,
+                                                            //al of the second node is the sum of two numbers, obtained from two initial linked lists by summarizing second nodes of linked lists, etc.
+                                                            //(on each step we need to consider occurred carry-outs and carry-ins).
+    ListNode* current = new ListNode;           //Creates a new node, which will be the first node in the new Linked List and is pointed by pointers current and
+    ListNode* first = current;                  //first.
+
+    //Two pointers will move through their linked lists
+    ListNode* current1 = first1;
+    ListNode* current2 = first2;
+
+
+    int s = 1;      //Marker, which is 1 when we consider first nodes in first and second linked lists (0 otherwise)
+    int sum = 0;    //The sum of two current nodes from the linked lists.
+    int cin = 0;    //Carry in from the summarizing of previous nodes
+
+
+    if ((current1==NULL) && (current2==NULL)) {     //In case of two empty linked lists, the function returns NULL
+        return NULL;
+    }
+
+    while ((current1!=NULL) || (current2!=NULL)){       //Until both linked lists are gone through,
+        if (current1 == NULL){      //If it came to the end of the first linked list,
+            sum = cin + current2->val;      //the sum is just cin + value of the node from the second linked list.
+        } else if (current2 == NULL){       //If it came to the end of the second linked list,
+            sum = cin + current1->val;      //the sum is just cin + value of the node from the first linked list.
+        } else {        //If it still hasn’t come to the end of any linked list,
+            sum = cin + current1->val + current2->val;          //the sum is cin + value of the node from the first linked list + value of the node from the second linked list.
+        }
+
+        if (sum > 9 ){      //Means, that the sum of two digits is more than 9, thus, we need to do carry out.
+            cin = 1;        //cin becomes 1.
+            sum = sum - 10; //Removes ten from sum.
+        } else {            //Means, that the sum of two digits is not more than 9, thus, we don’t need to do carry out.
+            cin = 0;        //cin becomes 0.
+        }
+        if (s == 1){      //Now we consider first nodes in two linked lists.
+            current->val = sum;     //Because we already have the first node in the third linked list, we make val of this node equal to sum.
+            //Moves current1 and current2 to the next nodes of the respective linked lists, if possible.
+            if (current1!=NULL){current1 = current1->next;}
+            if (current2!=NULL){current2 = current2->next;}
+            s = 0;  //Makes s = 0, because we’ve already moved to the next nodes.
+        } else {    //We’ve already considered first nodes in two linked lists.
+            current->pushBackNode(sum);     //Need to push back the next node to the third linked list with the val = sum.
+            current = current->next;        //Moves current to the next of just created node
+            //Moves current1 and current2 to the next nodes of the respective linked lists, if possible.
+            if (current1!=NULL){current1 = current1->next;}
+            if (current2!=NULL){current2 = current2->next;}
+        }
+    }
+    //If after going through linked lists we have cin = 1, it means that we need to create additional node in the third linked list with the val = 1.
+    if (cin ==1){
+        current->pushBackNode(1);
+    }
+
+    return first;       //Finally, the function returns first - pointer to the beginning of third linked list.
+
+}
+
+void deleteList(ListNode* first){       //Deletes all the nodes in the linked list
+    ListNode* currentP  = first;        //Points to the current node
+    ListNode* nextP = first->next;      //Points to the next node
+    while (nextP!=NULL){                //Goes through each node of the list,
+        currentP->next = nextP->next;   //Makes the next member of currentP equal to the next member of nextP
+        delete (nextP);                 //Deletes nextP
+        nextP = currentP->next;         //Makes nextP points to the currentP->next
+    }
+    //Deletes node, which wasn’t deleted during the cycle:
+    delete (first);     //first
+}
+
+void printList (ListNode* current){     //Prints the values from the linked list by going through each node.
+    while (current!= NULL) {
+        cout << current->val << " ";
+        current = current->next;
+    }
+    cout<<endl;
+}
+
+int main() {
+    ListNode* first1 = new ListNode;
+    first1->val = 7;
+    first1->next = new ListNode;
+    first1->next->val = 1;
+    first1->next->next = new ListNode;
+    first1->next->next->val = 6;
+    first1->next->next->next = NULL;
+
+
+    ListNode* first2 = new ListNode;
+    first2->val = 5;
+    first2->next = new ListNode;
+    first2->next->val = 9;
+    first2->next->next = new ListNode;
+    first2->next->next->val = 2;
+    first2->next->next->next = NULL;
+
+    ListNode* first3 = getList(first1, first2);
+
+    cout << "First linked list: ";
+    printList(first1);
+    cout << "Second linked list: ";
+    printList(first2);
+    cout << "Final linked list: ";
+    printList(first3);
+
+    deleteList(first1);
+    deleteList(first2);
+    deleteList(first3);
+
+    return 0;
+}
