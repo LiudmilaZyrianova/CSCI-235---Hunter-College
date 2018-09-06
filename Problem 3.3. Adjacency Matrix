@@ -4,6 +4,11 @@
 //Programming Assignment 3
 //Problem 3
 
+/* Write a program to nd minimum weight cycle in an undirected weighted graph.
+The input is the Adjacency Matrix A of the graph. If there is an edge between vertex i to vertex j, and
+weight of this edge is w, then A[i; j] = A[j; i] = w. If there is no edge between i and j, A[i; j] = A[j; i] = 􀀀1.
+*/
+
 #include <iostream>
 #include <vector>
 #include <stack>
